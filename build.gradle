@@ -1,0 +1,36 @@
+plugins {
+    id 'java'
+    id 'com.github.johnrengelman.shadow' version '8.1.1' // For fat JAR
+}
+
+group = 'com.example.features'
+version = '1.0.0'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'com.amazonaws:aws-lambda-java-core:1.2.3'
+    implementation 'com.amazonaws:aws-lambda-java-events:3.11.1'
+    implementation 'mysql:mysql-connector-java:8.0.33'
+    implementation 'com.google.code.gson:gson:2.10.1'
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+// Shadow plugin task config
+tasks.named('shadowJar') {
+    archiveBaseName.set('shop-lambda')
+    archiveClassifier.set('') // No "-all"
+    archiveVersion.set('1.0.0')
+}
+
+build.dependsOn shadowJar
