@@ -2,13 +2,13 @@ package com.example.features.Handler;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
-import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
-import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
+import com.amazonaws.services.lambda.runtime.events.ApplicationLoadBalancerRequestEvent;
+import com.amazonaws.services.lambda.runtime.events.ApplicationLoadBalancerResponseEvent;
 
-public class MainHandler implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
+public class MainHandler implements RequestHandler<ApplicationLoadBalancerRequestEvent, ApplicationLoadBalancerResponseEvent> {
 
     @Override
-    public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent request, Context context) {
+    public ApplicationLoadBalancerResponseEvent handleRequest(ApplicationLoadBalancerRequestEvent request, Context context) {
         String httpMethod = request.getHttpMethod();
         String path = request.getPath();
 
@@ -26,9 +26,12 @@ public class MainHandler implements RequestHandler<APIGatewayProxyRequestEvent, 
             case "PUT":
                 return new UpdateProductHandler().handleRequest(request, context);
             default:
-                return new APIGatewayProxyResponseEvent()
-                        .withStatusCode(400)
-                        .withBody("Unsupported HTTP method: " + httpMethod);
+                ApplicationLoadBalancerResponseEvent response = new ApplicationLoadBalancerResponseEvent();
+                response.setStatusCode(400);
+                response.setStatusDescription("400 Bad Request");
+                response.setBody("Unsupported HTTP method: " + httpMethod);
+                response.setIsBase64Encoded(false);
+                return response;
         }
     }
 }
