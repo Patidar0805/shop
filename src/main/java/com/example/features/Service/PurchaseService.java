@@ -3,23 +3,25 @@ package com.example.features.Service;
 
 import com.example.features.Domain.Product;
 import com.example.features.Domain.Purchase;
-import com.example.features.repository.Productrepository;
 
 import com.example.features.exception.InsufficientStockException;
 import com.example.features.exception.ProductNotFoundException;
+import com.example.features.repository.ProductReadRepository;
+import com.example.features.repository.ProductWriteRepository;
 
 import java.sql.SQLException;
 
 public class PurchaseService {
-    private final Productrepository repository;
-
+    private final ProductReadRepository ReadRepository;
+    private final ProductWriteRepository WriteRepository;
     public PurchaseService() {
-        this.repository = new Productrepository();
+        this.ReadRepository = new ProductReadRepository();
+        this.WriteRepository = new ProductWriteRepository();
     }
 
     public void processPurchase(Purchase purchase) {
         try {
-            Product product = repository.getProductById(purchase.getProductId());
+            Product product = ReadRepository.getProductById(purchase.getProductId());
 
             if (product == null) {
                 throw new ProductNotFoundException("Product not found with ID: " + purchase.getProductId());
@@ -29,7 +31,7 @@ public class PurchaseService {
                 throw new InsufficientStockException("Insufficient stock. Available: " + product.getQuantity());
             }
 
-            repository.decreaseQuantity(purchase.getProductId(), purchase.getQuantity());
+            WriteRepository.decreaseQuantity(purchase.getProductId(), purchase.getQuantity());
 
             System.out.println("Purchase successful for " + purchase.getCustomerName());
 
