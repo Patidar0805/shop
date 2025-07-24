@@ -6,7 +6,7 @@ package com.example.features.Domain;
         private int quantity;
         private String customerName;
 
-        public Purchase() {}
+
 
         public Purchase(int productId, int quantity, String customerName) {
             this.productId = productId;

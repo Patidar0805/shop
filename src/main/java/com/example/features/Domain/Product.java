@@ -9,6 +9,15 @@ public class Product {
 
     public Product() {}
 
+
+    public Product(String name, String category, double price, int quantity) {
+        this.name = name;
+        this.category = category;
+        this.price = price;
+        this.quantity = quantity;
+    }
+
+    //for read operations
     public Product(int id, String name, String category, double price, int quantity) {
         this.id = id;
         this.name = name;
@@ -58,6 +67,8 @@ public class Product {
     public void setQuantity(int quantity) {
         this.quantity = quantity;
     }
+
+    @Override
     public String toString() {
         return "Product {" +
                 "ID = " + id +
