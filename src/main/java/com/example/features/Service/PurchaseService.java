@@ -8,7 +8,7 @@ public class PurchaseService {
 
     public void processPurchase(Purchase purchase) {
         try {
-            orderRepository.placeOrderWithTransaction(purchase);
+           // orderRepository.placeOrderWithTransaction(purchase);
             System.out.println("Purchase successful for " + purchase.getCustomerName());
         } catch (Exception e) {
             throw new RuntimeException("Purchase fail: " + e.getMessage());
