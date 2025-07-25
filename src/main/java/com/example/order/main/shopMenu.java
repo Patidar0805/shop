@@ -32,10 +32,6 @@ public class shopMenu {
 
             switch (option) {
                 case 1 -> {
-                    System.out.print("Enter ID: ");
-                    int id = scanner.nextInt();
-                    scanner.nextLine();
-
                     System.out.print("Enter Name: ");
                     String name = scanner.nextLine();
 
@@ -47,16 +43,18 @@ public class shopMenu {
 
                     System.out.print("Enter Price: ");
                     int price = scanner.nextInt();
+                    scanner.nextLine(); // Clear buffer
 
-                    Product product = new Product(id, name, category, quantity, price);
+                    Product product = new Product(name, category, price, quantity);
 
                     try {
                         productService.createProduct(product);
-                        System.out.println(" Product created.");
+                        System.out.println("Product created!!!");
                     } catch (SQLException e) {
-                        System.out.println(" Error creating product: " + e.getMessage());
+                        System.out.println("Error creating product: " + e.getMessage());
                     }
                 }
+
 
                 case 2 -> {
                     System.out.print("Enter Product ID: ");
@@ -149,7 +147,7 @@ public class shopMenu {
                             }
                         }
                     } catch (SQLException e) {
-                        System.out.println("❌ Error retrieving products: " + e.getMessage());
+                        System.out.println("Error retrieving products: " + e.getMessage());
                     }
                 }
 
