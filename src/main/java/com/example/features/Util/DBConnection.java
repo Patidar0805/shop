@@ -8,8 +8,12 @@ import java.sql.SQLException;
 
         private static final String URL = "jdbc:mysql://localhost:3306/shopdb";
         private static final String USERNAME = "root";
-        private static final String PASSWORD = "Sarvika@0805";
+        private static final String PASSWORD = "root";
 
+        /*  private static final String URL = "jdbc:mysql://localhost:3306/shopdb";
+        private static final String USERNAME = "root";
+        private static final String PASSWORD = "Sarvika@0805";
+*/
         private static Connection connection;
 
         private DBConnection() {
