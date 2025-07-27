@@ -22,6 +22,8 @@ CREATE TABLE order_product_matrix (
     FOREIGN KEY (order_id) REFERENCES orders(order_id),
     FOREIGN KEY (product_id) REFERENCES products(id)
 );
+ALTER TABLE order_product_matrix
+ADD COLUMN quantity INT NOT NULL DEFAULT 1;
 
 select * from products;
 select * from orders;
