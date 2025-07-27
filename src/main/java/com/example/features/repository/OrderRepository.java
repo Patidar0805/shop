@@ -2,7 +2,6 @@ package com.example.features.repository;
 
 import com.example.features.Domain.OrderItem;
 import com.example.features.Domain.Product;
-import com.example.features.Util.DBConnection;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -22,16 +21,38 @@ public class OrderRepository {
         }
     }
 
+    public void checkAndReduceProductStock(int productId, int quantity, Connection conn) throws SQLException {
+        String checkSql = "SELECT quantity FROM products WHERE id = ?";
+        try (PreparedStatement checkStmt = conn.prepareStatement(checkSql)) {
+            checkStmt.setInt(1, productId);
+            ResultSet rs = checkStmt.executeQuery();
+            if (rs.next()) {
+                int available = rs.getInt("quantity");
+                if (available < quantity) {
+                    throw new SQLException("Insufficient stock for product ID " + productId);
+                }
+            } else {
+                throw new SQLException("Product ID " + productId + " not found.");
+            }
+        }
+
+        String updateSql = "UPDATE products SET quantity = quantity - ? WHERE id = ?";
+        try (PreparedStatement updateStmt = conn.prepareStatement(updateSql)) {
+            updateStmt.setInt(1, quantity);
+            updateStmt.setInt(2, productId);
+            updateStmt.executeUpdate();
+        }
+    }
+
     public void addProductToOrder(int orderId, int productId, int quantity, Connection conn) throws SQLException {
-        String sql = "INSERT INTO order_product_matrix (order_id, product_id, quantity) VALUES (?, ?, ?)";
-        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+        String insertSql = "INSERT INTO order_product_matrix (order_id, product_id, quantity) VALUES (?, ?, ?)";
+        try (PreparedStatement stmt = conn.prepareStatement(insertSql)) {
             stmt.setInt(1, orderId);
             stmt.setInt(2, productId);
             stmt.setInt(3, quantity);
             stmt.executeUpdate();
         }
     }
-
 
     public void updateOrderTotal(int orderId, double total, Connection conn) throws SQLException {
         String sql = "UPDATE orders SET total_sell = ? WHERE order_id = ?";
@@ -59,7 +80,6 @@ public class OrderRepository {
                             rs.getString("category"),
                             rs.getDouble("price"),
                             rs.getInt("stock_quantity")
-
                     );
 
                     int quantity = rs.getInt("order_quantity");
@@ -70,6 +90,7 @@ public class OrderRepository {
         }
         return items;
     }
+
     public List<Product> getProductsForOrder(int orderId, Connection conn) throws SQLException {
         String sql = "SELECT p.id, p.name, p.price, opm.quantity " +
                 "FROM products p " +
@@ -102,5 +123,36 @@ public class OrderRepository {
         throw new SQLException("Order not found for ID " + orderId);
     }
 
+    public int getOrderIdByNickname(String nickname, Connection conn) throws SQLException {
+        String sql = "SELECT order_id FROM orders WHERE nickname = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, nickname);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) return rs.getInt("order_id");
+            }
+        }
+        throw new SQLException("Order not found for nickname: " + nickname);
+    }
 
+    public void deleteOrder(int orderId, Connection conn) throws SQLException {
+        String deleteMatrix = "DELETE FROM order_product_matrix WHERE order_id = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(deleteMatrix)) {
+            stmt.setInt(1, orderId);
+            stmt.executeUpdate();
+        }
+
+        String deleteOrder = "DELETE FROM orders WHERE order_id = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(deleteOrder)) {
+            stmt.setInt(1, orderId);
+            stmt.executeUpdate();
+        }
+    }
+
+    public void deleteOrderProducts(int orderId, Connection conn) throws SQLException {
+        String sql = "DELETE FROM order_product_matrix WHERE order_id = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, orderId);
+            stmt.executeUpdate();
+        }
+    }
 }
