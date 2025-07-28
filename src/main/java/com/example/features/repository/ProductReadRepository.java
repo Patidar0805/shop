@@ -27,7 +27,7 @@ public class ProductReadRepository {
         return null;
     }
 
-    // 👇 Add this single-arg version back for non-transactional use
+
     public Product getProductById(int id) throws SQLException {
         try (Connection conn = DBConnection.getConnection()) {
             return getProductById(id, conn);

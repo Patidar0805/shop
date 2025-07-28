@@ -1,9 +1,7 @@
 package com.example.order.main;
 
 import com.example.features.Domain.Product;
-import com.example.features.Domain.Purchase;
 import com.example.features.Service.ProductService;
-import com.example.features.Service.PurchaseService;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -14,7 +12,6 @@ public class shopMenu {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         ProductService productService = new ProductService();
-        PurchaseService purchaseService = new PurchaseService();
 
         while (true) {
             System.out.println("\n=== SHOP MENU ===");
@@ -22,9 +19,8 @@ public class shopMenu {
             System.out.println("2. Get Product by ID");
             System.out.println("3. Update Product");
             System.out.println("4. Delete Product");
-            System.out.println("5. Purchase Product");
-            System.out.println("6. Get All Products");
-            System.out.println("7. Exit");
+            System.out.println("5. Get All Products");
+            System.out.println("6. Exit");
             System.out.print("Select option: ");
 
             int option = scanner.nextInt();
@@ -112,26 +108,6 @@ public class shopMenu {
                 }
 
                 case 5 -> {
-                    System.out.print("Enter Product ID to Purchase: ");
-                    int id = scanner.nextInt();
-
-                    System.out.print("Enter Quantity to Purchase: ");
-                    int qty = scanner.nextInt();
-                    scanner.nextLine();
-
-                    System.out.print("Enter Customer Name: ");
-                    String customerName = scanner.nextLine();
-
-                    Purchase purchase = new Purchase(id, qty, customerName);
-                    try {
-                        purchaseService.processPurchase(purchase);
-                        System.out.println(" Purchase completed.");
-                    } catch (Exception e) {
-                        System.out.println(" Purchase error: " + e.getMessage());
-                    }
-
-                }
-                case 6 -> {
                     try {
                         List<Product> products = productService.getAllProducts();
                         if (products.isEmpty()) {
@@ -151,7 +127,7 @@ public class shopMenu {
                     }
                 }
 
-                case 7 -> {
+                case 6 -> {
                     System.out.println("Exiting shop system. Bye!");
                     System.exit(0);
                 }

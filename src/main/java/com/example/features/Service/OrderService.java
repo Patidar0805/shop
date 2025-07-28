@@ -15,6 +15,7 @@ import java.util.Map;
 public class OrderService {
     private static final OrderRepository repo = new OrderRepository();
 
+    /*
     public int placeOrder(OrderRequest req) throws SQLException {
         try (Connection conn = DBConnection.getConnection()) {
             conn.setAutoCommit(false);
@@ -46,7 +47,7 @@ public class OrderService {
             }
         }
     }
-
+*/
     public static order getOrder(int orderId) throws SQLException {
         try (Connection conn = DBConnection.getConnection()) {
             List<Product> products = repo.getProductsForOrder(orderId, conn);

@@ -50,33 +50,4 @@ public class ProductWriteRepository {
             stmt.executeUpdate();
         }
     }
-
-    public void decreaseQuantity(int productId, int quantity, Connection conn) throws SQLException {
-        String sql = "UPDATE products SET quantity = quantity - ? WHERE id = ? AND quantity >= ?";
-
-        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setInt(1, quantity);
-            stmt.setInt(2, productId);
-            stmt.setInt(3, quantity);
-
-            int updated = stmt.executeUpdate();
-            if (updated == 0) {
-                throw new SQLException("Insufficient stock or product not found.");
-            }
-        }
-    }
-
-
-    public void increaseQuantity(int productId, int quantity) throws SQLException {
-        String sql = "UPDATE products SET quantity = quantity + ? WHERE id = ?";
-
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setInt(1, quantity);
-            stmt.setInt(2, productId);
-
-            stmt.executeUpdate();
-        }
-    }
 }

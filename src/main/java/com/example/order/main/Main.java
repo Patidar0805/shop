@@ -3,17 +3,14 @@ package com.example.order.main;
 import com.example.features.Domain.Product;
 import com.example.features.Service.OrderService;
 import com.example.features.Service.ProductService;
-import com.example.features.request.OrderRequest;
 import com.example.features.Domain.order;
 
-import java.sql.SQLException;
 import java.util.*;
 public class Main {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         ProductService productService = new ProductService();
         OrderService orderService = new OrderService();
-
         while (true) {
             System.out.println("\n SHOP MENU ");
             System.out.println("1. Create Order");
@@ -53,17 +50,18 @@ public class Main {
                             productQuantities.put(productId, qty);
                         }
 
-                        int orderId = orderService.placeFullOrder(nickname, productQuantities);
+                        orderService.placeFullOrder(nickname, productQuantities);
                         System.out.println("Order placed");
                         order ord = orderService.getOrderByNickname(nickname);
 
                             System.out.println("Order ID: " + ord.getOrderId());
                             System.out.println("Nickname: " + ord.getNickname());
-                            System.out.println("Total Cost: " + ord.getTotalSell());
+
                             System.out.println("Products:");
                             for (Product p : ord.getProducts()) {
-                                System.out.println("- " + p.getName() + " (" + p.getPrice() + ", Qty: " + p.getQuantity() + ")");
+                                System.out.println("- " + p.getName() + " (" + p.getPrice() + ", Qty: " + p.getQuantity() + ")"+" = "+(p.getPrice()*p.getQuantity()));
                             }
+                        System.out.println("Total Cost: " + ord.getTotalSell());
                     }
 
                     case 2 -> {
@@ -73,11 +71,12 @@ public class Main {
                         if (ord != null) {
                             System.out.println("Order ID: " + ord.getOrderId());
                             System.out.println("Nickname: " + ord.getNickname());
-                            System.out.println("Total Cost: " + ord.getTotalSell());
+
                             System.out.println("Products:");
                             for (Product p : ord.getProducts()) {
-                                System.out.println("- " + p.getName() + " (" + p.getPrice() + ", Qty: " + p.getQuantity() + ")");
+                                System.out.println("- " + p.getName() + " (" + p.getPrice() + ", Qty: " + p.getQuantity() + ")"+" = "+(p.getPrice()*p.getQuantity()));
                             }
+                            System.out.println("Total Cost: " + ord.getTotalSell());
                         } else {
                             System.out.println("No order found.");
                         }
@@ -113,6 +112,17 @@ public class Main {
 
                         boolean updated = orderService.updateOrder(nickname, newProducts);
                         System.out.println(updated ? "Order updated." : "Update failed.");
+                        order ord = orderService.getOrderByNickname(nickname);
+                        if (ord != null && updated) {
+                            System.out.println("Order ID: " + ord.getOrderId());
+                            System.out.println("Nickname: " + ord.getNickname());
+
+                            System.out.println("Products:");
+                            for (Product p : ord.getProducts()) {
+                                System.out.println("- " + p.getName() + " (" + p.getPrice() + ", Qty: " + p.getQuantity() + ")"+" = "+(p.getPrice()*p.getQuantity()));
+                            }
+                            System.out.println("Total Cost: " + ord.getTotalSell());
+                        }
                     }
 
                     case 5 -> {

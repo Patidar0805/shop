@@ -63,34 +63,6 @@ public class OrderRepository {
         }
     }
 
-    public List<OrderItem> getOrderItems(int orderId, Connection conn) throws SQLException {
-        List<OrderItem> items = new ArrayList<>();
-        String sql = "SELECT p.id, p.name, p.category, p.price, p.quantity as stock_quantity, opm.quantity as order_quantity " +
-                "FROM products p " +
-                "JOIN order_product_matrix opm ON p.id = opm.product_id " +
-                "WHERE opm.order_id = ?";
-
-        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setInt(1, orderId);
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    Product product = new Product(
-                            rs.getInt("id"),
-                            rs.getString("name"),
-                            rs.getString("category"),
-                            rs.getDouble("price"),
-                            rs.getInt("stock_quantity")
-                    );
-
-                    int quantity = rs.getInt("order_quantity");
-                    OrderItem item = new OrderItem(product, quantity);
-                    items.add(item);
-                }
-            }
-        }
-        return items;
-    }
-
     public List<Product> getProductsForOrder(int orderId, Connection conn) throws SQLException {
         String sql = "SELECT p.id, p.name, p.price, opm.quantity " +
                 "FROM products p " +
