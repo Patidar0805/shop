@@ -33,6 +33,9 @@ public class ProductService {
     public void updateProduct(Product product) throws SQLException {
         WriteRepository.updateProduct(product);
     }
+    public void updateProductQuantity(int Id, int Quantity ) throws SQLException {
+        WriteRepository.updateProductQuantity(Id,Quantity);
+    }
 
     public void deleteProduct(int id) throws SQLException {
         WriteRepository.deleteProduct(id);

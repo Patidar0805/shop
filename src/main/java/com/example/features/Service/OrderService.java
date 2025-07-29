@@ -75,8 +75,8 @@ public class OrderService {
                     int productId = entry.getKey();
                     int quantity = entry.getValue();
 
-                    repo.checkAndReduceProductStock(productId, quantity, conn);
-                    repo.addProductToOrder(orderId, productId, quantity, conn);
+                    repo.checkAndReduceProductStock(productQuantities, conn);
+                    repo.addProductToOrder(orderId,productQuantities, conn);
                 }
 
                 List<Product> products = repo.getProductsForOrder(orderId, conn);
@@ -173,8 +173,8 @@ public class OrderService {
                     int qty = entry.getValue();
 
 
-                    repo.checkAndReduceProductStock(productId, qty, conn);
-                    repo.addProductToOrder(orderId, productId, qty, conn);
+                    repo.checkAndReduceProductStock(newProducts, conn);
+                    repo.addProductToOrder(orderId,newProducts, conn);
                 }
 
                 List<Product> updated = repo.getProductsForOrder(orderId, conn);

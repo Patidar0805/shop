@@ -39,6 +39,18 @@ public class ProductWriteRepository {
             stmt.executeUpdate();
         }
     }
+    public void updateProductQuantity(int Id , int quantity) throws SQLException {
+        String sql = "UPDATE products SET quantity = ? WHERE id = ?";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, quantity);
+            stmt.setInt(2, Id);
+
+            stmt.executeUpdate();
+        }
+    }
 
     public void deleteProduct(int id) throws SQLException {
         String sql = "DELETE FROM products WHERE id = ?";

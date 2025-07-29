@@ -4,8 +4,8 @@ import com.example.features.Domain.OrderItem;
 import com.example.features.Domain.Product;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class OrderRepository {
 
@@ -21,7 +21,7 @@ public class OrderRepository {
         }
     }
 
-    public void checkAndReduceProductStock(int productId, int quantity, Connection conn) throws SQLException {
+  /*  public void checkAndReduceProductStock(int productId, int quantity, Connection conn) throws SQLException {
         String checkSql = "SELECT quantity FROM products WHERE id = ?";
         try (PreparedStatement checkStmt = conn.prepareStatement(checkSql)) {
             checkStmt.setInt(1, productId);
@@ -43,14 +43,74 @@ public class OrderRepository {
             updateStmt.executeUpdate();
         }
     }
+*/
+    public void checkAndReduceProductStock(Map<Integer, Integer> productQuantities, Connection conn) throws SQLException {
 
-    public void addProductToOrder(int orderId, int productId, int quantity, Connection conn) throws SQLException {
-        String insertSql = "INSERT INTO order_product_matrix (order_id, product_id, quantity) VALUES (?, ?, ?)";
+        Set<Integer> productIds = productQuantities.keySet();
+
+        String placeholders = productIds.stream().map(id -> "?").collect(Collectors.joining(", "));
+        String sql = "SELECT id, quantity FROM products WHERE id IN (" + placeholders + ")";
+
+        Map<Integer, Integer> availableQuantities = new HashMap<>();
+
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            int index = 1;
+            for (Integer id : productIds) {
+                stmt.setInt(index++, id);
+            }
+
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                int id = rs.getInt("id");
+                int qty = rs.getInt("quantity");
+                availableQuantities.put(id, qty);
+            }
+        }
+
+        for (Map.Entry<Integer, Integer> entry : productQuantities.entrySet()) {
+            int productId = entry.getKey();
+            int requiredQty = entry.getValue();
+
+            Integer availableQty = availableQuantities.get(productId);
+
+            if (availableQty == null) {
+                throw new SQLException("Product ID " + productId + " not found.");
+            }
+
+            if (availableQty < requiredQty) {
+                throw new SQLException("Insufficient stock for product ID " + productId);
+            }
+        }
+
+        String updateSql = "UPDATE products SET quantity = quantity - ? WHERE id = ?";
+        try (PreparedStatement updateStmt = conn.prepareStatement(updateSql)) {
+            for (Map.Entry<Integer, Integer> entry : productQuantities.entrySet()) {
+                int productId = entry.getKey();
+                int qty = entry.getValue();
+                updateStmt.setInt(1, qty);
+                updateStmt.setInt(2, productId);
+                updateStmt.addBatch();
+            }
+            updateStmt.executeBatch();
+        }
+    }
+
+
+
+    public void addProductToOrder(int orderId, Map<Integer, Integer> productQuantities, Connection conn) throws SQLException {
+        String insertSql = "INSERT INTO order_product_matrix (order_id, product_id, quantity) " +
+                "VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE quantity =  VALUES(quantity)";
         try (PreparedStatement stmt = conn.prepareStatement(insertSql)) {
-            stmt.setInt(1, orderId);
-            stmt.setInt(2, productId);
-            stmt.setInt(3, quantity);
-            stmt.executeUpdate();
+            for (Map.Entry<Integer, Integer> entry : productQuantities.entrySet()) {
+                int productId = entry.getKey();
+                int quantity = entry.getValue();
+
+                stmt.setInt(1, orderId);
+                stmt.setInt(2, productId);
+                stmt.setInt(3, quantity);
+                stmt.addBatch();
+            }
+            stmt.executeBatch();
         }
     }
 

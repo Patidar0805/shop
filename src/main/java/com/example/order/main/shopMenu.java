@@ -20,7 +20,8 @@ public class shopMenu {
             System.out.println("3. Update Product");
             System.out.println("4. Delete Product");
             System.out.println("5. Get All Products");
-            System.out.println("6. Exit");
+            System.out.println("6. Update Products Quantity");
+            System.out.println("7. Exit");
             System.out.print("Select option: ");
 
             int option = scanner.nextInt();
@@ -128,10 +129,23 @@ public class shopMenu {
                 }
 
                 case 6 -> {
+                    System.out.print("Enter Product ID to Update Quantity: ");
+                    int Id = scanner.nextInt();
+                    System.out.print("Enter Updated Quantity: ");
+                    int  Quantity = scanner.nextInt();
+
+                    try {
+                        productService.updateProductQuantity(Id,Quantity);
+                        System.out.println(" Product quantity updated.");
+                    } catch (SQLException e) {
+                        System.out.println(" Error updating product: " + e.getMessage());
+                    }
+                }
+
+                case 7 -> {
                     System.out.println("Exiting shop system. Bye!");
                     System.exit(0);
                 }
-
                 default -> System.out.println(" Invalid option. Try again.");
             }
         }
