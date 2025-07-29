@@ -65,25 +65,17 @@ public class OrderService {
         }
     }
 
+    // Optimized main function
     public int placeFullOrder(String nickname, Map<Integer, Integer> productQuantities) throws SQLException {
         try (Connection conn = DBConnection.getConnection()) {
             conn.setAutoCommit(false);
             try {
                 int orderId = repo.createOrder(nickname, conn);
 
-                for (Map.Entry<Integer, Integer> entry : productQuantities.entrySet()) {
-                    int productId = entry.getKey();
-                    int quantity = entry.getValue();
+                repo.checkAndReduceProductStock(productQuantities, conn);
+                repo.addProductToOrder(orderId, productQuantities, conn);
 
-                    repo.checkAndReduceProductStock(productQuantities, conn);
-                    repo.addProductToOrder(orderId,productQuantities, conn);
-                }
-
-                List<Product> products = repo.getProductsForOrder(orderId, conn);
-                double total = products.stream()
-                        .mapToDouble(p -> p.getPrice() * p.getQuantity())
-                        .sum();
-
+                double total = repo.calculateOrderTotal(orderId, conn);
                 repo.updateOrderTotal(orderId, total, conn);
 
                 conn.commit();
@@ -94,6 +86,7 @@ public class OrderService {
             }
         }
     }
+
 
     public order getOrderByNickname(String nickname) throws SQLException {
         try (Connection conn = DBConnection.getConnection()) {

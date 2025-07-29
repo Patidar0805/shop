@@ -43,7 +43,7 @@ public class OrderRepository {
             updateStmt.executeUpdate();
         }
     }
-*/
+
     public void checkAndReduceProductStock(Map<Integer, Integer> productQuantities, Connection conn) throws SQLException {
 
         Set<Integer> productIds = productQuantities.keySet();
@@ -95,6 +95,58 @@ public class OrderRepository {
         }
     }
 
+   */
+    public void checkAndReduceProductStock(Map<Integer, Integer> productQuantities, Connection conn) throws SQLException {
+        Set<Integer> productIds = productQuantities.keySet();
+
+        String placeholders = productIds.stream().map(id -> "?").collect(Collectors.joining(", "));
+        String sql = "SELECT id, quantity FROM products WHERE id IN (" + placeholders + ")";
+
+        Map<Integer, Integer> availableQuantities = new HashMap<>();
+
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            int index = 1;
+            for (Integer id : productIds) {
+                stmt.setInt(index++, id);
+            }
+
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                int id = rs.getInt("id");
+                int qty = rs.getInt("quantity");
+                availableQuantities.put(id, qty);
+            }
+        }
+
+        // Validate all products before making any changes
+        for (Map.Entry<Integer, Integer> entry : productQuantities.entrySet()) {
+            int productId = entry.getKey();
+            int requiredQty = entry.getValue();
+
+            Integer availableQty = availableQuantities.get(productId);
+
+            if (availableQty == null) {
+                throw new SQLException("Product ID " + productId + " not found.");
+            }
+
+            if (availableQty < requiredQty) {
+                throw new SQLException("Insufficient stock for product ID " + productId);
+            }
+        }
+
+        // Batch update stock quantities
+        String updateSql = "UPDATE products SET quantity = quantity - ? WHERE id = ?";
+        try (PreparedStatement updateStmt = conn.prepareStatement(updateSql)) {
+            for (Map.Entry<Integer, Integer> entry : productQuantities.entrySet()) {
+                int productId = entry.getKey();
+                int qty = entry.getValue();
+                updateStmt.setInt(1, qty);
+                updateStmt.setInt(2, productId);
+                updateStmt.addBatch();
+            }
+            updateStmt.executeBatch();
+        }
+    }
 
 
     public void addProductToOrder(int orderId, Map<Integer, Integer> productQuantities, Connection conn) throws SQLException {
@@ -185,6 +237,26 @@ public class OrderRepository {
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, orderId);
             stmt.executeUpdate();
+        }
+    }
+
+    // new method
+    public double calculateOrderTotal(int orderId, Connection conn) throws SQLException {
+        String sql = """
+        SELECT SUM(p.price * opm.quantity) as total
+        FROM order_product_matrix opm
+        JOIN products p ON opm.product_id = p.id
+        WHERE opm.order_id = ?
+        """;
+
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, orderId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getDouble("total");
+                }
+                return 0.0;
+            }
         }
     }
 }
