@@ -20,8 +20,8 @@ public class OrderRepository {
             throw new SQLException("Failed to generate order_id");
         }
     }
-
-  /*  public void checkAndReduceProductStock(int productId, int quantity, Connection conn) throws SQLException {
+    
+    /*  public void checkAndReduceProductStock(int productId, int quantity, Connection conn) throws SQLException {
         String checkSql = "SELECT quantity FROM products WHERE id = ?";
         try (PreparedStatement checkStmt = conn.prepareStatement(checkSql)) {
             checkStmt.setInt(1, productId);
